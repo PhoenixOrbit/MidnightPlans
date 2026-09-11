@@ -29,7 +29,11 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="footer-bottom">
-          <p>© 2026 Midnight Plans. All rights reserved.</p>
+          <p>
+            © 2026 Midnight Plans. All rights reserved.
+            {' · '}
+            <a href="/admin" className="footer-admin-link" aria-label="Admin login">Admin</a>
+          </p>
           <p className="footer-credit">
             Designed by&nbsp;
             <a

@@ -1,54 +1,81 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 
 // ── Edit nav links here ──────────────────────────────────────
 const NAV_LINKS = [
-  { label: 'Our Services',  id: 'services'      },
-  { label: 'Serving Areas', id: 'serving-areas' },
-  { label: 'About us',      id: 'about'         },
-  { label: 'Contact us',    id: 'contact'       },
+  { label: 'Home',          to: '/'              },
+  { label: 'Our Services',  to: '/services'      },
+  { label: 'Portfolio',     to: '/portfolio'     },
+  { label: 'Serving Areas', to: '/serving-areas' },
+  { label: 'About Us',      to: '/about'         },
+  { label: 'Contact Us',    to: '/contact'       },
 ];
 
-function scrollTo(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-}
-
 export default function Navigation() {
-  const [activeId, setActiveId] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
 
-  // Highlight the nav pill matching the current visible section
-  useEffect(() => {
-    const ids = NAV_LINKS.map((l) => l.id);
-    const observers = [];
-
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveId(id); },
-        { threshold: 0.4 }
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-
-    return () => observers.forEach((o) => o.disconnect());
-  }, []);
+  // Close the mobile menu on every navigation.
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   return (
     <div className="nav-wrapper" role="navigation" aria-label="Main navigation">
       <nav className="main-nav">
         {NAV_LINKS.map((link) => (
-          <button
-            key={link.id}
-            className={`nav-pill${activeId === link.id ? ' active' : ''}`}
-            onClick={() => { scrollTo(link.id); setActiveId(link.id); }}
+          <NavLink
+            key={link.to}
+            to={link.to}
+            end={link.to === '/'}
+            className={({ isActive }) => `nav-pill${isActive ? ' active' : ''}`}
             aria-label={`Go to ${link.label}`}
-            aria-current={activeId === link.id ? 'true' : undefined}
           >
             {link.label}
-          </button>
+          </NavLink>
         ))}
       </nav>
+
+      {/* Mobile hamburger toggle */}
+      <button
+        type="button"
+        className={`nav-toggle${menuOpen ? ' open' : ''}`}
+        aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={menuOpen}
+        aria-controls="mobile-nav-panel"
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Mobile slide-down panel */}
+      <div
+        id="mobile-nav-panel"
+        className={`nav-mobile-panel${menuOpen ? ' open' : ''}`}
+      >
+        {NAV_LINKS.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            end={link.to === '/'}
+            className={({ isActive }) => `nav-mobile-link${isActive ? ' active' : ''}`}
+          >
+            {link.label}
+          </NavLink>
+        ))}
+        <a href="tel:+14387781250" className="nav-mobile-cta">
+          📞 (438) 778 1250
+        </a>
+      </div>
+
+      {menuOpen && (
+        <button
+          type="button"
+          className="nav-mobile-backdrop"
+          aria-label="Close menu"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
     </div>
   );
 }
